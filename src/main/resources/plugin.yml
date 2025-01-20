@@ -1,0 +1,10 @@
+name: "NoWorld"
+
+version: "1.0-SNAPSHOT"
+
+main: "com.github.nollyak.NoWorld"
+
+api:
+  - "1.0.0"
+
+author: "NollyakWasTaken"
