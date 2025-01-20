@@ -30,6 +30,17 @@ I suppose I can explain how to use the NoWorld plugin's commands for world editi
 - `/editor selection[sel] point[p] second[s]` - Sets the second selection point. Don't mess it up.
 - `/editor selection[sel] clear[c]` - Clears the selection. Hmph, you should know this already.
 
+## Project Information
+
+This project was made for a specific fork of Nukkit, so if something bad happens, send issues. But don't think I'm doing this because I care or anything! And oh, pull requests are welcome. Hmph.
+
+## TODO
+
+I guess there are some things left to do, not that I need your help or anything:
+- Enhance the current command system and add more commands. It's not like I need more features or anything.
+- Improve performance. Hmph, it's already fast enough.
+- Write more documentation. Not that you read it or anything.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details. Not that I care if you read it or not.
