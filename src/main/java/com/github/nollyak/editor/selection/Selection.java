@@ -26,4 +26,8 @@ public interface Selection {
 
     double getVolume();
 
+    void rotate(int angle);
+
+    void flip(String direction);
+
 }

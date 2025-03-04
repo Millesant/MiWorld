@@ -9,10 +9,7 @@ import cn.nukkit.command.CommandSender;
 
 import com.github.nollyak.NoWorld;
 
-import com.github.nollyak.editor.operation.RedoOperation;
-import com.github.nollyak.editor.operation.ReplaceOperation;
-import com.github.nollyak.editor.operation.SetOperation;
-import com.github.nollyak.editor.operation.UndoOperation;
+import com.github.nollyak.editor.operation.*;
 
 import lombok.Getter;
 
@@ -68,6 +65,15 @@ public class DefaultEditorCommand extends Command {
                     /editor replace <from block id> <to block id> - Replaces the block at the current selection with the given block
                     /editor undo - Undoes the last operation
                     /editor redo - Redoes the last undone operation
+                    /editor copy - Copies the selected area to the clipboard
+                    /editor paste - Pastes the copied area from the clipboard
+                    /editor cut - Cuts the selected area and stores it in the clipboard
+                    /editor rotate <angle> - Rotates the selected area by the specified angle (90, 180, or 270 degrees)
+                    /editor flip <direction> - Flips the selected area in the specified direction (horizontal or vertical)
+                    /editor fill <block id> - Fills the selected area with the specified block type
+                    /editor outline <block id> - Creates an outline of the selected area with the specified block type
+                    /editor move <x> <y> <z> - Moves the selected area to the specified target position
+                    /editor scale <factor> - Scales the selected area by the specified factor
                     """);
                 yield true;
             }
@@ -318,6 +324,390 @@ public class DefaultEditorCommand extends Command {
 
                 final var operation = new RedoOperation(
                     session
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "copy" -> {
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                final var operation = new CopyOperation(
+                    session
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "paste" -> {
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var operation = new PasteOperation(
+                    session
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "cut" -> {
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                final var operation = new CutOperation(
+                    session
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "rotate" -> {
+                if (
+                    arguments.length == 1
+                ) {
+                    player.sendMessage("You have to provide a rotation angle (90, 180, or 270 degrees)");
+                    yield false;
+                }
+
+                final var angleArgument = arguments[1];
+
+                if (!(
+                    angleArgument.matches("90|180|270")
+                )) {
+                    player.sendMessage("Invalid rotation angle provided");
+                    yield false;
+                }
+
+                final var angle = Integer.parseInt(angleArgument);
+
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                final var operation = new RotateOperation(
+                    session,
+                    angle
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "flip" -> {
+                if (
+                    arguments.length == 1
+                ) {
+                    player.sendMessage("You have to provide a flip direction (horizontal or vertical)");
+                    yield false;
+                }
+
+                final var directionArgument = arguments[1];
+
+                if (!(
+                    directionArgument.matches("horizontal|vertical")
+                )) {
+                    player.sendMessage("Invalid flip direction provided");
+                    yield false;
+                }
+
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                final var operation = new FlipOperation(
+                    session,
+                    directionArgument
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "fill" -> {
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                if (
+                    arguments.length == 1
+                ) {
+                    player.sendMessage("You have to provide a block id");
+                    yield false;
+                }
+
+                final var blockArgument = arguments[1];
+
+                if (!(
+                    blockArgument.matches("[0-9]+")
+                )) {
+                    player.sendMessage("Invalid block id provided");
+                    yield false;
+                }
+
+                final var blockId = Integer.parseInt(blockArgument);
+
+                final var block = Block.get(blockId);
+
+                final var operation = new FillOperation(
+                    session,
+                    block
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "outline" -> {
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                if (
+                    arguments.length == 1
+                ) {
+                    player.sendMessage("You have to provide a block id");
+                    yield false;
+                }
+
+                final var blockArgument = arguments[1];
+
+                if (!(
+                    blockArgument.matches("[0-9]+")
+                )) {
+                    player.sendMessage("Invalid block id provided");
+                    yield false;
+                }
+
+                final var blockId = Integer.parseInt(blockArgument);
+
+                final var block = Block.get(blockId);
+
+                final var operation = new OutlineOperation(
+                    session,
+                    block
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "move" -> {
+                if (
+                    arguments.length < 4
+                ) {
+                    player.sendMessage("You have to provide x, y, and z coordinates");
+                    yield false;
+                }
+
+                final var xArgument = arguments[1];
+                final var yArgument = arguments[2];
+                final var zArgument = arguments[3];
+
+                if (!(
+                    xArgument.matches("-?[0-9]+") &&
+                        yArgument.matches("-?[0-9]+") &&
+                        zArgument.matches("-?[0-9]+")
+                )) {
+                    player.sendMessage("Invalid coordinates provided");
+                    yield false;
+                }
+
+                final var x = Integer.parseInt(xArgument);
+                final var y = Integer.parseInt(yArgument);
+                final var z = Integer.parseInt(zArgument);
+
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                final var operation = new MoveOperation(
+                    session,
+                    x,
+                    y,
+                    z
+                );
+
+                this.getPlugin()
+                    .getWorldService()
+                    .execute(player.getLevel(), operation);
+
+                player.sendMessage(String.format(
+                    "Operation '%s' executed successfully",
+                    operation.getName()
+                ));
+                yield true;
+            }
+            case "scale" -> {
+                if (
+                    arguments.length == 1
+                ) {
+                    player.sendMessage("You have to provide a scaling factor");
+                    yield false;
+                }
+
+                final var factorArgument = arguments[1];
+
+                if (!(
+                    factorArgument.matches("[0-9]+(\\.[0-9]+)?")
+                )) {
+                    player.sendMessage("Invalid scaling factor provided");
+                    yield false;
+                }
+
+                final var factor = Double.parseDouble(factorArgument);
+
+                final var session = this.getPlugin()
+                    .getSessionService()
+                    .getSession(player.getName())
+                    .orElseThrow();
+
+                final var selection = session.selection();
+
+                if (!(
+                    selection.hasFirstPoint() &&
+                        selection.hasSecondPoint()
+                )) {
+                    player.sendMessage("You have to set a first point and a second point first");
+                    yield false;
+                }
+
+                final var operation = new ScaleOperation(
+                    session,
+                    factor
                 );
 
                 this.getPlugin()
