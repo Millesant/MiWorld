@@ -1,10 +1,7 @@
-name: "NoWorld"
+name: MiWorld
 
-version: "1.0-SNAPSHOT"
+version: 1.0-SNAPSHOT
+author: Millesant
 
-main: "com.github.nollyak.NoWorld"
-
-api:
-  - "1.0.0"
-
-author: "NollyakWasTaken"
+main: me.millesant.MiWorld
+api: 1.0.0
